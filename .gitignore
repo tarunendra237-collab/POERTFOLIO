@@ -1,0 +1,28 @@
+# Environment variables - NEVER commit secrets!
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+.vercel/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
