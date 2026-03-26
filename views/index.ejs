@@ -670,20 +670,7 @@
     const chatMessages = document.getElementById('chatbot-messages');
     const chatInput = document.getElementById('chatbot-input-field');
     const chatSend = document.getElementById('chatbot-send');
-
-    const botResponses = [{
-      patterns: [/hi|hello|hey/i],
-      response: 'Hi there! I am live on your portfolio. How can I help you today?'
-    }, {
-      patterns: [/project|work/i],
-      response: 'I have built responsive web apps and portfolios. Ask me about my skills or latest project.'
-    }, {
-      patterns: [/skill|tech/i],
-      response: 'I work with HTML, CSS, JavaScript, Node.js, Express, and MongoDB. I also enjoy learning new tools.'
-    }, {
-      patterns: [/default/i],
-      response: 'That sounds interesting! Tell me more or ask for specific details about the site.'
-    }];
+    let isLoading = false;
 
     function addMessage(text, isUser) {
       const item = document.createElement('div');
@@ -695,28 +682,50 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function getBotReply(message) {
-      const lower = message.trim();
-      for (const rule of botResponses) {
-        if (rule.patterns.some(p => p.test(lower))) {
-          return rule.response;
-        }
-      }
-      return 'I am learning! Please try a different question or ask about "projects" or "skills".';
-    }
-
-    function sendChat() {
+    async function sendChat() {
       const text = chatInput.value.trim();
-      if (!text) return;
+      if (!text || isLoading) return;
+      
       addMessage(text, true);
       chatInput.value = '';
-      setTimeout(() => addMessage(getBotReply(text), false), 450);
+      isLoading = true;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: text })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get response');
+        }
+
+        const data = await response.json();
+        addMessage(data.reply, false);
+      } catch (error) {
+        console.error('Chat error:', error);
+        addMessage('Sorry, I encountered an error. Please try again.', false);
+      } finally {
+        isLoading = false;
+      }
     }
 
-    chatToggle.addEventListener('click', () => { chatWidget.style.display = 'block'; chatToggle.style.display = 'none'; chatInput.focus(); });
-    chatClose.addEventListener('click', () => { chatWidget.style.display = 'none'; chatToggle.style.display = 'block'; });
+    chatToggle.addEventListener('click', () => { 
+      chatWidget.style.display = 'block'; 
+      chatToggle.style.display = 'none'; 
+      chatInput.focus(); 
+    });
+    chatClose.addEventListener('click', () => { 
+      chatWidget.style.display = 'none'; 
+      chatToggle.style.display = 'block'; 
+    });
     chatSend.addEventListener('click', sendChat);
-    chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+    chatInput.addEventListener('keydown', e => { 
+      if (e.key === 'Enter' && !isLoading) sendChat(); 
+    });
   </script>
 
   <script>
