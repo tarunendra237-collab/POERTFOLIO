@@ -63,6 +63,42 @@ Visit http://localhost:8080 and click the 💬 button!
 
 ---
 
+## Optional: Ollama Local LLM (FREE)
+
+If you want to run a local model instead of OpenAI, you can use [Ollama](https://ollama.com).
+
+1. Install Ollama
+	- macOS: `brew install ollama`
+	- Linux: follow https://ollama.com/docs/install
+
+2. Run Llama3 locally:
+	```bash
+	ollama run llama3
+	```
+
+3. Use the local API (same logic as existing `/api/chat` but target local URL):
+	```js
+	const response = await fetch("http://localhost:11434/api/generate", {
+	  method: "POST",
+	  headers: { "Content-Type": "application/json" },
+	  body: JSON.stringify({
+		 model: "llama3",
+		 prompt: "Hello, how are you?",
+		 max_tokens: 200,
+	  }),
+	});
+
+	const data = await response.json();
+	console.log(data);
+	// `data.choices[0].message.content` or similar depending on model output format
+	```
+
+4. Optional: update backend `routes/routes.js` to route through Ollama when no OPENAI API key.
+
+> Keep `.env` approach for OpenAI, and use Ollama as local fallback when `OPENAI_API_KEY` is missing.
+
+---
+
 ## Cost
 
 - Free trial: $5 credit (expires after 3 months)
